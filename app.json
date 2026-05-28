@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Campus Event Manager",
+    "slug": "campus-event-manager-apk",
+    "version": "1.0.0",
+    "scheme": "campusevents",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.campusevents.manager"
+    },
+    "android": {
+      "package": "com.campusevents.manager",
+      "adaptiveIcon": {
+        "backgroundColor": "#172554"
+      }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "44ca45f8-92eb-463a-a05c-5ac8990b90bf"
+      }
+    },
+    "owner": "riki_6super"
+  }
+}
