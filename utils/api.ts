@@ -44,6 +44,7 @@ type RequestOptions = {
 };
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL?.trim() ?? "";
+const REQUEST_TIMEOUT_MS = 75_000;
 
 function getApiUrl(): string {
   if (!API_URL) {
@@ -73,21 +74,36 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     }
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   let response: Response;
   try {
     response = await fetch(`${getApiUrl()}${path}`, {
       method: options.method ?? "GET",
       headers,
-      body: options.body ? JSON.stringify(options.body) : undefined
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: controller.signal
     });
   } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("The server took too long to respond. Render may be waking up; please try again.");
+    }
     throw new Error(
       `Cannot reach backend at ${getApiUrl()}. Make sure FastAPI is running and EXPO_PUBLIC_BACKEND_URL is correct.`
     );
+  } finally {
+    clearTimeout(timeout);
   }
 
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
+  let data: any = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(`The server returned an invalid response (${response.status}). Please try again.`);
+    }
+  }
 
   if (!response.ok) {
     const detail = data?.detail || "Request failed";
