@@ -26,39 +26,41 @@ export default function HomeScreen() {
   if (user?.role === "admin") {
     const pending = events.filter((event) => event.status === "pending").length;
     const approved = events.filter((event) => event.status === "approved" || event.status === "live").length;
+    const calendarEvents = events.filter((event) => event.status === "approved" || event.status === "live");
     return (
       <Screen>
         <Header title="Admin dashboard" subtitle="Create, edit, and monitor events submitted by your office." variant="admin" />
         <View style={styles.statsRow}>
-          <StatCard label="My events" value={String(events.length)} icon="albums-outline" />
-          <StatCard label="Pending" value={String(pending)} icon="hourglass-outline" />
-          <StatCard label="Approved" value={String(approved)} icon="checkmark-circle-outline" />
+          <StatCard label="My events" value={String(events.length)} icon="albums-outline" onPress={() => router.push({ pathname: "/admin/my-events", params: { filter: "all" } })} />
+          <StatCard label="Pending" value={String(pending)} icon="hourglass-outline" onPress={() => router.push({ pathname: "/admin/my-events", params: { filter: "pending" } })} />
+          <StatCard label="Approved" value={String(approved)} icon="checkmark-circle-outline" onPress={() => router.push({ pathname: "/admin/my-events", params: { filter: "approved" } })} />
         </View>
         <View style={styles.quickCard}>
           <Text style={styles.sectionTitle}>Quick actions</Text>
           <PrimaryButton title="Create event" icon="add-circle-outline" onPress={() => router.push("/admin/create-event")} />
           <PrimaryButton title="My events" tone="muted" icon="list-outline" onPress={() => router.push("/admin/my-events")} />
         </View>
-        <EventCalendar events={events} />
+        <EventCalendar events={calendarEvents} />
         {events.slice(0, 3).map((event) => <EventCard key={event.id} event={event} />)}
       </Screen>
     );
   }
 
   if (user?.role === "registrar") {
+    const calendarEvents = events.filter((event) => event.status === "approved" || event.status === "live");
     return (
       <Screen>
         <Header title="Registrar dashboard" subtitle="Review event proposals and keep the approval queue moving." variant="registrar" />
         <View style={styles.statsRow}>
-          <StatCard label="Pending queue" value="Review" icon="file-tray-full-outline" />
-          <StatCard label="Approved events" value="Live" icon="shield-checkmark-outline" />
+          <StatCard label="Pending queue" value="Review" icon="file-tray-full-outline" onPress={() => router.push("/registrar/pending-events")} />
+          <StatCard label="Approved events" value="Live" icon="shield-checkmark-outline" onPress={() => router.push("/(tabs)/live")} />
         </View>
         <View style={styles.quickCard}>
           <Text style={styles.sectionTitle}>Approval workflow</Text>
           <PrimaryButton title="Pending events" icon="time-outline" onPress={() => router.push("/registrar/pending-events")} />
           <PrimaryButton title="Approved events" tone="muted" icon="checkmark-done-outline" onPress={() => router.push("/registrar/approved-events")} />
         </View>
-        <EventCalendar events={events} />
+        <EventCalendar events={calendarEvents} />
       </Screen>
     );
   }

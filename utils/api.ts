@@ -129,7 +129,8 @@ export const api = {
     request<EventItem>("/events", { method: "POST", body: payload }),
   updateEvent: (id: string, payload: Partial<EventItem>) =>
     request<EventItem>(`/events/${id}`, { method: "PUT", body: payload }),
-  deleteEvent: (id: string) => request<{ message: string }>(`/events/${id}`, { method: "DELETE" }),
+  deleteEvent: (id: string, reason?: string) =>
+    request<{ message: string }>(`/events/${id}`, { method: "DELETE", body: reason ? { reason } : undefined }),
   approveEvent: (id: string) => request<EventItem>(`/events/${id}/approve`, { method: "PUT" }),
   rejectEvent: (id: string, reason?: string) =>
     request<EventItem>(`/events/${id}/reject`, { method: "PUT", body: { reason } }),

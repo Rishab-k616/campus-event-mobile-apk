@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  type ScrollViewProps,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,11 +17,23 @@ import { colors, gradients, radius, spacing } from "@/constants/theme";
 import { useTheme } from "@/contexts/ThemeContext";
 import { EventItem, NotificationItem } from "@/utils/api";
 
-export function Screen({ children }: { children: React.ReactNode }) {
+function formatEventDate(value: string) {
+  const datePart = value.slice(0, 10);
+  const parsed = new Date(`${datePart}T12:00:00`);
+  return Number.isNaN(parsed.getTime()) ? datePart : parsed.toDateString();
+}
+
+export function Screen({
+  children,
+  refreshControl
+}: {
+  children: React.ReactNode;
+  refreshControl?: ScrollViewProps["refreshControl"];
+}) {
   const { palette } = useTheme();
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.bg }]}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} refreshControl={refreshControl}>
         {children}
       </ScrollView>
     </SafeAreaView>
@@ -227,14 +240,26 @@ export function SelectField({
   );
 }
 
-export function StatCard({ label, value, icon }: { label: string; value: string; icon: keyof typeof Ionicons.glyphMap }) {
+export function StatCard({
+  label,
+  value,
+  icon,
+  onPress
+}: {
+  label: string;
+  value: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  onPress?: () => void;
+}) {
   const { palette } = useTheme();
+  const Container = onPress ? Pressable : View;
   return (
-    <View style={[styles.statCard, { backgroundColor: palette.card, borderColor: palette.line }]}>
+    <Container style={[styles.statCard, { backgroundColor: palette.card, borderColor: palette.line }]} onPress={onPress}>
       <Ionicons name={icon} size={24} color={colors.primary} />
       <Text style={[styles.statValue, { color: palette.text }]}>{value}</Text>
       <Text style={[styles.statLabel, { color: palette.muted }]}>{label}</Text>
-    </View>
+      {onPress ? <Ionicons name="chevron-forward" size={16} color={palette.muted} style={styles.statChevron} /> : null}
+    </Container>
   );
 }
 
@@ -265,7 +290,7 @@ export function EventCard({
         <Text style={[styles.eventDescription, { color: palette.muted }]}>{event.description}</Text>
         <View style={styles.metaRow}>
           <Ionicons name="calendar-outline" size={16} color={colors.muted} />
-          <Text style={[styles.meta, { color: palette.muted }]}>{new Date(event.date).toDateString()}</Text>
+          <Text style={[styles.meta, { color: palette.muted }]}>{formatEventDate(event.date)}</Text>
         </View>
         <View style={styles.metaRow}>
           <Ionicons name="location-outline" size={16} color={colors.muted} />
@@ -490,6 +515,7 @@ const styles = StyleSheet.create({
   },
   statValue: { marginTop: spacing.sm, color: colors.text, fontSize: 24, fontWeight: "900" },
   statLabel: { marginTop: 2, color: colors.muted, fontSize: 13, fontWeight: "700" },
+  statChevron: { position: "absolute", right: spacing.sm, top: spacing.sm },
   eventCard: {
     backgroundColor: colors.white,
     borderRadius: radius.lg,
